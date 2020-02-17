@@ -53,19 +53,18 @@ export default {
 	}),
 	methods: {
 		login() {
-			this.$store.dispatch("LOGIN", {
-				username: this.username,
-				password: this.password
-			});
-			// .then(success => {
-			//   this.$router.push("/");
-			// })
-			// .catch(error => {
-			//   this.error = true;
-			// });
+			this.$store
+				.dispatch("login", {
+					username: this.username,
+					password: this.password
+				})
+				.then(() => {
+					this.$router.push("/");
+				})
+				.catch(() => {
+					this.error = true;
+				});
 		}
 	}
 };
 </script>
-
-<style></style>
