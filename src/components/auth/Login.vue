@@ -17,6 +17,7 @@
 								name="login"
 								label="Login"
 								type="text"
+								:rules="[rules.required]"
 							></v-text-field>
 
 							<v-text-field
@@ -25,6 +26,7 @@
 								name="password"
 								label="Password"
 								type="password"
+								:rules="[rules.required]"
 							></v-text-field>
 						</v-card-text>
 						<v-divider light></v-divider>
@@ -49,7 +51,10 @@ export default {
 	data: () => ({
 		username: "",
 		password: "",
-		error: false
+		error: false,
+		rules: {
+			required: value => !!value || "Required"
+		}
 	}),
 	methods: {
 		login() {

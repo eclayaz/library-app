@@ -3,11 +3,12 @@ import qs from "querystring";
 
 const state = {
 	status: "",
-	token: localStorage.getItem("token") || "",
-	user: {}
+	user: localStorage.getItem("logged-user") || ""
 };
 
-const getters = {};
+const getters = {
+	isAuthenticated: state => !!state.user
+};
 
 const actions = {
 	login({ commit }, user) {
@@ -16,39 +17,24 @@ const actions = {
 
 			axios({
 				method: "POST",
-				url: "http://localhost:15984/_session",
+				url: "http://localhost:5984/_session",
 				data: qs.stringify({
-					username: "value1",
-					password: "value2"
+					username: user.username,
+					password: user.password
 				}),
-				headers: {
-					"content-type": "application/x-www-form-urlencoded;charset=utf-8",
-					"Access-Control-Allow-Origin": "*"
-				}
+				withCredentials: true
 			})
-				// axios(
-				// 	{
-				// 		url: "http://localhost:15984/_session",
-				// 		data: qs.stringify({
-				// 			item1: "value1",
-				// 			item2: "value2"
-				// 		}),
-				// 		method: "POST"
-				// 	},
-				// 	options
-				// )
 				.then(resp => {
-					const token = resp.data.token;
-					const user = resp.data.user;
-					localStorage.setItem("token", token);
-					// Add the following line:
-					axios.defaults.headers.common["Authorization"] = token;
-					commit("auth_success", token, user);
+					const roles = resp.data.roles;
+					const user = resp.data.name;
+
+					localStorage.setItem("logged-user", user);
+					commit("auth_success", user, roles);
 					resolve(resp);
 				})
 				.catch(err => {
 					commit("auth_error");
-					localStorage.removeItem("token");
+					localStorage.removeItem("logged-user");
 					reject(err);
 				});
 		});
@@ -91,9 +77,9 @@ const mutations = {
 	auth_request(state) {
 		state.status = "loading";
 	},
-	auth_success(state, token, user) {
+	auth_success(state, user, roles) {
 		state.status = "success";
-		state.token = token;
+		state.roles = roles;
 		state.user = user;
 	},
 	auth_error(state) {
