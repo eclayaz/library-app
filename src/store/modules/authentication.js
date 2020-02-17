@@ -65,9 +65,14 @@ const actions = {
 	},
 	logout({ commit }) {
 		return new Promise(resolve => {
+			axios({
+				method: "DELETE",
+				url: "http://localhost:5984/_session",
+				withCredentials: true
+			});
+
 			commit("logout");
-			localStorage.removeItem("token");
-			delete axios.defaults.headers.common["Authorization"];
+			localStorage.removeItem("logged-user");
 			resolve();
 		});
 	}
@@ -87,7 +92,8 @@ const mutations = {
 	},
 	logout(state) {
 		state.status = "";
-		state.token = "";
+		state.roles = "";
+		state.user = "";
 	}
 };
 
