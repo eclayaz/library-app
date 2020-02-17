@@ -1,27 +1,24 @@
 <template>
-  <v-app>
-    <router-view></router-view>
-  </v-app>
+	<v-app>
+		<Menu v-if="isAuthenticated" />
+		<router-view></router-view>
+	</v-app>
 </template>
 
 <script>
-// import Login from "./components/auth/Login";
-// import Signup from "./components/auth/Signup";
-// import Menu from "./components/Menu";
-// import LibrarianPortal from "./components/LibrarianPortal";
+import Menu from "@/components/Menu";
+import { mapGetters } from "vuex";
 
 export default {
-  name: "App",
+	name: "App",
 
-  components: {
-    // Login,
-    // Signup,
-    // Menu,
-    // LibrarianPortal
-  },
+	components: {
+		Menu
+	},
+	computed: mapGetters(["isAuthenticated"]),
 
-  data: () => ({
-    //
-  })
+	data: () => ({
+		//
+	})
 };
 </script>

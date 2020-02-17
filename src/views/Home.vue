@@ -1,15 +1,18 @@
 <template>
-	<div class="home">
-		<img alt="Vue logo" src="../assets/logo.png" />
-	</div>
+	<v-content>
+		<v-container fluid>
+			<Books />
+		</v-container>
+	</v-content>
 </template>
 
 <script>
-// @ is an alias to /src
-// import HelloWorld from '@/components/HelloWorld.vue'
+import Books from "@/components/Books";
 
 export default {
 	name: "Home",
-	components: {}
+	components: {
+		Books
+	}
 };
 </script>
