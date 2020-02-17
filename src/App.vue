@@ -1,22 +1,14 @@
 <template>
   <v-app>
-    <Menu />
-
-    <v-content>
-      <v-container fluid>
-        <LibrarianPortal />
-        <!-- If using vue-router -->
-        <!-- <router-view></router-view> -->
-      </v-container>
-    </v-content>
+    <router-view></router-view>
   </v-app>
 </template>
 
 <script>
 // import Login from "./components/auth/Login";
 // import Signup from "./components/auth/Signup";
-import Menu from "./components/Menu";
-import LibrarianPortal from "./components/LibrarianPortal";
+// import Menu from "./components/Menu";
+// import LibrarianPortal from "./components/LibrarianPortal";
 
 export default {
   name: "App",
@@ -24,8 +16,8 @@ export default {
   components: {
     // Login,
     // Signup,
-    Menu,
-    LibrarianPortal
+    // Menu,
+    // LibrarianPortal
   },
 
   data: () => ({
