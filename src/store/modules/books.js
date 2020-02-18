@@ -37,6 +37,7 @@ const actions = {
 						key: book.name,
 						value: {
 							_rev: resp.data.rev,
+							name: book.name,
 							isbn: book.isbn,
 							category: book.category,
 							author: book.author,
@@ -57,9 +58,14 @@ const actions = {
 		return new Promise((resolve, reject) => {
 			commit("book_request");
 			const skip = (options.page - 1) * options.itemsPerPage;
+
+			const view = options.search
+				? `_design/books/_view/_search?limit=${options.itemsPerPage}&skip=${skip}&key="${options.search}"`
+				: `_design/books/_view/_info?limit=${options.itemsPerPage}&skip=${skip}`;
+
 			axios({
 				method: "GET",
-				url: `http://localhost:5984/library/_design/books/_view/basic_info?limit=${options.itemsPerPage}&skip=${skip}`,
+				url: `http://localhost:5984/library/${view}`,
 				withCredentials: true
 			})
 				.then(resp => {
@@ -85,8 +91,6 @@ const mutations = {
 	},
 	book_create(state, book) {
 		state.status = "created";
-		console.log(book);
-
 		state.books.unshift(book);
 	},
 	book_edit(state, data, book) {

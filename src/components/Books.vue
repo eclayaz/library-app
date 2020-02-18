@@ -135,7 +135,7 @@ export default {
         text: "Name",
         align: "left",
         sortable: false,
-        value: "key"
+        value: "value.name"
       },
       { text: "ISBN", value: "value.isbn", sortable: false },
       { text: "Category", value: "value.category", sortable: false },
@@ -198,7 +198,8 @@ export default {
     options: {
       handler() {
         const { sortBy, sortDesc, page, itemsPerPage } = this.options;
-        this.fetchData({ sortBy, sortDesc, page, itemsPerPage });
+        const search = this.search;
+        this.fetchData({ sortBy, sortDesc, page, itemsPerPage, search });
       },
       deep: true
     },
@@ -206,7 +207,9 @@ export default {
       val || this.close();
     },
     search() {
-      console.log("searching");
+      const { sortBy, sortDesc, itemsPerPage } = this.options;
+      const search = this.search;
+      this.fetchData({ sortBy, sortDesc, page: 1, itemsPerPage, search });
     },
     publishedDateMenu(val) {
       val && setTimeout(() => (this.$refs.picker.activePicker = "YEAR"));
