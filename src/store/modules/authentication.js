@@ -3,11 +3,14 @@ import qs from "querystring";
 
 const state = {
 	status: "",
-	user: localStorage.getItem("logged-user") || ""
+	user: localStorage.getItem("logged-user") || "",
+	created_username: ""
 };
 
 const getters = {
-	isAuthenticated: state => !!state.user
+	isAuthenticated: state => !!state.user,
+	authStatus: state => state.status,
+	createdUsername: state => state.created_username
 };
 
 const actions = {
@@ -47,7 +50,6 @@ const actions = {
 				method: "PUT",
 				data: {
 					_id: `org.couchdb.user:${user.username}`,
-					status: "activated",
 					name: user.username,
 					password: user.password,
 					first_name: user.first_name,
@@ -60,9 +62,8 @@ const actions = {
 				withCredentials: true
 			})
 				.then(resp => {
-					const username = user.username;
-					localStorage.setItem("logged-user", username);
-					commit("auth_success", username, "reader");
+					commit("auth_created", user.username);
+					localStorage.removeItem("logged-user");
 					resolve(resp);
 				})
 				.catch(err => {
@@ -95,6 +96,10 @@ const mutations = {
 		state.status = "success";
 		state.roles = roles;
 		state.user = user;
+	},
+	auth_created(state, username) {
+		state.status = "created";
+		state.created_username = username;
 	},
 	auth_error(state) {
 		state.status = "error";

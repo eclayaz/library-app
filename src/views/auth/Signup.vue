@@ -120,6 +120,12 @@ export default {
 						phone: this.phone
 					})
 					.then(() => {
+						// this.$store.commit("SET_NOTIFICATION", {
+						// 	display: true,
+						// 	text:
+						// 		"Your account has been successfully created! you can now login.",
+						// 	alertClass: "danger"
+						// });
 						this.$router.push("/");
 					})
 					.catch(() => {
