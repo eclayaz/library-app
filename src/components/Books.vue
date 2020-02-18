@@ -30,7 +30,7 @@
             <v-col cols="2" class="d-flex justify-end">
               <v-dialog v-model="dialog" max-width="500px">
                 <template v-slot:activator="{ on }">
-                  <v-btn color="primary" dark class="mb-2" v-on="on">New Item</v-btn>
+                  <v-btn color="primary" dark class="mb-2" v-on="on">New Book</v-btn>
                 </template>
                 <v-card>
                   <v-card-title>
@@ -39,23 +39,45 @@
 
                   <v-card-text>
                     <v-container>
-                      <v-row>
-                        <v-col cols="12" sm="6" md="4">
-                          <v-text-field v-model="editedItem.name" label="Dessert name"></v-text-field>
-                        </v-col>
-                        <v-col cols="12" sm="6" md="4">
-                          <v-text-field v-model="editedItem.calories" label="Calories"></v-text-field>
-                        </v-col>
-                        <v-col cols="12" sm="6" md="4">
-                          <v-text-field v-model="editedItem.fat" label="Fat (g)"></v-text-field>
-                        </v-col>
-                        <v-col cols="12" sm="6" md="4">
-                          <v-text-field v-model="editedItem.carbs" label="Carbs (g)"></v-text-field>
-                        </v-col>
-                        <v-col cols="12" sm="6" md="4">
-                          <v-text-field v-model="editedItem.protein" label="Protein (g)"></v-text-field>
-                        </v-col>
-                      </v-row>
+                      <v-col sm="8">
+                        <v-text-field v-model="editedItem.name" label="Name"></v-text-field>
+                      </v-col>
+                      <v-col sm="8">
+                        <v-text-field v-model="editedItem.isbn" label="ISBN" type="number"></v-text-field>
+                      </v-col>
+                      <v-col sm="8">
+                        <v-select
+                          :items="bookCategories"
+                          v-model="editedItem.category"
+                          label="Catagory"
+                          outlined
+                        ></v-select>
+                      </v-col>
+                      <v-col sm="8">
+                        <v-menu
+                          ref="menu"
+                          :close-on-content-click="false"
+                          transition="scale-transition"
+                          offset-y
+                          min-width="290px"
+                        >
+                          <template v-slot:activator="{ on }">
+                            <v-text-field
+                              v-model="editedItem.date"
+                              label="Published date"
+                              prepend-icon="event"
+                              readonly
+                              v-on="on"
+                            ></v-text-field>
+                          </template>
+                          <v-date-picker
+                            ref="sa"
+                            v-model="editedItem.date"
+                            :max="new Date().toISOString().substr(0, 10)"
+                            @change="savePublishDate"
+                          ></v-date-picker>
+                        </v-menu>
+                      </v-col>
                     </v-container>
                   </v-card-text>
 
@@ -107,22 +129,30 @@ export default {
     editedIndex: -1,
     editedItem: {
       name: "",
-      calories: 0,
-      fat: 0,
-      carbs: 0,
-      protein: 0
+      isbn: "",
+      category: "Action",
+      date: null
     },
     defaultItem: {
       name: "",
-      calories: 0,
-      fat: 0,
-      carbs: 0,
-      protein: 0
-    }
+      isbn: "",
+      category: "",
+      date: new Date().toISOString().substr(0, 10)
+    },
+    bookCategories: [
+      "Action",
+      "Classics",
+      "Comic",
+      "Detective",
+      "Fantasy",
+      "Fiction",
+      "Romance",
+      "Science"
+    ]
   }),
   computed: {
     formTitle() {
-      return this.editedIndex === -1 ? "New Item" : "Edit Item";
+      return this.editedIndex === -1 ? "New book" : "Edit book";
     }
   },
   watch: {
@@ -140,6 +170,9 @@ export default {
     },
     search() {
       console.log("searching");
+    },
+    publishedDateMenu(val) {
+      val && setTimeout(() => (this.$refs.picker.activePicker = "YEAR"));
     }
   },
   mounted() {
@@ -209,6 +242,9 @@ export default {
           });
         }, 1000);
       });
+    },
+    savePublishDate(date) {
+      this.$refs.menu.save(date);
     },
     getDesserts() {
       return [
