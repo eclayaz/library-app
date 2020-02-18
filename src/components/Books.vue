@@ -14,6 +14,7 @@
         <v-toolbar flat color="white">
           <v-toolbar-title>Books</v-toolbar-title>
         </v-toolbar>
+        <v-alert :color="showMessage.class" :value="showMessage.display">{{showMessage.message}}</v-alert>
         <v-container fill-height fluid class="mt-0 pt-0">
           <v-row no-gutters align="center" justify="center">
             <v-col cols="3">
@@ -38,53 +39,67 @@
                   </v-card-title>
 
                   <v-card-text>
-                    <v-container>
-                      <v-col sm="8">
-                        <v-text-field v-model="editedItem.name" label="Name"></v-text-field>
-                      </v-col>
-                      <v-col sm="8">
-                        <v-text-field v-model="editedItem.isbn" label="ISBN" type="number"></v-text-field>
-                      </v-col>
-                      <v-col sm="8">
-                        <v-select
-                          :items="bookCategories"
-                          v-model="editedItem.category"
-                          label="Catagory"
-                          outlined
-                        ></v-select>
-                      </v-col>
-                      <v-col sm="8">
-                        <v-menu
-                          ref="menu"
-                          :close-on-content-click="false"
-                          transition="scale-transition"
-                          offset-y
-                          min-width="290px"
-                        >
-                          <template v-slot:activator="{ on }">
-                            <v-text-field
+                    <v-form>
+                      <v-container>
+                        <v-col sm="8">
+                          <v-text-field
+                            v-model="editedItem.name"
+                            label="Name"
+                            :rules="[rules.required]"
+                          ></v-text-field>
+                        </v-col>
+                        <v-col sm="8">
+                          <v-text-field v-model="editedItem.isbn" label="ISBN" type="number"></v-text-field>
+                        </v-col>
+                        <v-col sm="8">
+                          <v-select
+                            :items="bookCategories"
+                            v-model="editedItem.category"
+                            label="Catagory"
+                            outlined
+                          ></v-select>
+                        </v-col>
+                        <v-col sm="8">
+                          <v-menu
+                            ref="menu"
+                            :close-on-content-click="false"
+                            transition="scale-transition"
+                            offset-y
+                            min-width="290px"
+                          >
+                            <template v-slot:activator="{ on }">
+                              <v-text-field
+                                v-model="editedItem.date"
+                                label="Published date"
+                                prepend-icon="event"
+                                readonly
+                                v-on="on"
+                              ></v-text-field>
+                            </template>
+                            <v-date-picker
+                              ref="sa"
                               v-model="editedItem.date"
-                              label="Published date"
-                              prepend-icon="event"
-                              readonly
-                              v-on="on"
-                            ></v-text-field>
-                          </template>
-                          <v-date-picker
-                            ref="sa"
-                            v-model="editedItem.date"
-                            :max="new Date().toISOString().substr(0, 10)"
-                            @change="savePublishDate"
-                          ></v-date-picker>
-                        </v-menu>
-                      </v-col>
-                    </v-container>
+                              :max="new Date().toISOString().substr(0, 10)"
+                              @change="savePublishDate"
+                            ></v-date-picker>
+                          </v-menu>
+                        </v-col>
+                        <v-col sm="8">
+                          <v-text-field v-model="editedItem.author" label="Author"></v-text-field>
+                        </v-col>
+                      </v-container>
+                    </v-form>
                   </v-card-text>
 
                   <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn color="blue darken-1" text @click="close">Cancel</v-btn>
-                    <v-btn color="blue darken-1" text @click="save">Save</v-btn>
+                    <v-btn
+                      color="blue darken-1"
+                      :disabled="!isComplete"
+                      text
+                      @click.prevent="save()"
+                    >Save</v-btn>
                   </v-card-actions>
                 </v-card>
               </v-dialog>
@@ -108,6 +123,13 @@ export default {
   name: "LibrarianPortal",
   data: () => ({
     dialog: false,
+    showMessage: {
+      actios: "",
+      success: null,
+      message: "",
+      display: false,
+      class: "success"
+    },
     search: "",
     headers: [
       {
@@ -131,13 +153,15 @@ export default {
       name: "",
       isbn: "",
       category: "Action",
-      date: null
+      date: null,
+      author: ""
     },
     defaultItem: {
       name: "",
       isbn: "",
       category: "",
-      date: new Date().toISOString().substr(0, 10)
+      date: new Date().toISOString().substr(0, 10),
+      author: ""
     },
     bookCategories: [
       "Action",
@@ -148,11 +172,22 @@ export default {
       "Fiction",
       "Romance",
       "Science"
-    ]
+    ],
+    rules: {
+      required: value => !!value || "Required"
+    }
   }),
   computed: {
     formTitle() {
       return this.editedIndex === -1 ? "New book" : "Edit book";
+    },
+    isComplete() {
+      return (
+        this.editedItem.name &&
+        this.editedItem.isbn &&
+        this.editedItem.category &&
+        this.editedItem.date
+      );
     }
   },
   watch: {
@@ -203,11 +238,44 @@ export default {
       }, 300);
     },
     save() {
+      this.$store
+        .dispatch("book_create", {
+          name: this.editedItem.name,
+          isbn: this.editedItem.isbn,
+          category: this.editedItem.category,
+          published_date: this.editedItem.date,
+          author: this.editedItem.author
+        })
+        .then(() => {
+          this.showMessage = {
+            actios: "created",
+            success: true,
+            message: `Book ${this.editedItem.name} created successfully.`,
+            display: true,
+            class: "success"
+          };
+        })
+        .catch(err => {
+          console.log();
+          this.showMessage = {
+            actios: "created",
+            success: false,
+            message:
+              err.response.status === 409
+                ? `The book you are trying to create is already exist.`
+                : err.response.data.reason,
+            display: true,
+            class: "error"
+          };
+        });
+
+      //remove once items are getting from store
       if (this.editedIndex > -1) {
         Object.assign(this.desserts[this.editedIndex], this.editedItem);
       } else {
         this.desserts.push(this.editedItem);
       }
+
       this.close();
     },
     getDataFromApi() {

@@ -5,7 +5,6 @@
         <v-alert
           color="success"
           :value="getSingupNotification.display"
-          :text="ahsd"
         >{{getSingupNotification.text}}</v-alert>
         <v-form>
           <v-card class="elevation-12">
