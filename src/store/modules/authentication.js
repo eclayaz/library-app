@@ -43,22 +43,31 @@ const actions = {
 		return new Promise((resolve, reject) => {
 			commit("auth_request");
 			axios({
-				url: "http://localhost:3000/register",
-				data: user,
-				method: "POST"
+				url: `http://localhost:5984/_users/org.couchdb.user:${user.username}`,
+				method: "PUT",
+				data: {
+					_id: `org.couchdb.user:${user.username}`,
+					status: "activated",
+					name: user.username,
+					password: user.password,
+					first_name: user.first_name,
+					last_name: user.last_name,
+					email: user.email,
+					phone: user.phone,
+					roles: [],
+					type: "user"
+				},
+				withCredentials: true
 			})
 				.then(resp => {
-					const token = resp.data.token;
-					const user = resp.data.user;
-					localStorage.setItem("token", token);
-					// Add the following line:
-					axios.defaults.headers.common["Authorization"] = token;
-					commit("auth_success", token, user);
+					const username = user.username;
+					localStorage.setItem("logged-user", username);
+					commit("auth_success", username, "reader");
 					resolve(resp);
 				})
 				.catch(err => {
-					commit("auth_error", err);
-					localStorage.removeItem("token");
+					commit("auth_error");
+					localStorage.removeItem("logged-user");
 					reject(err);
 				});
 		});
