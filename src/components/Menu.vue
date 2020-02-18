@@ -11,9 +11,6 @@
 					<v-list-item-subtitle>Logged In</v-list-item-subtitle>
 				</v-list-item-content>
 			</v-list-item>
-			<v-card-actions>
-				<v-btn @click="logout" rounded color="indigo" dark>Logout</v-btn>
-			</v-card-actions>
 		</template>
 
 		<v-divider></v-divider>
@@ -26,6 +23,15 @@
 
 				<v-list-item-content>
 					<v-list-item-title>{{ item.title }}</v-list-item-title>
+				</v-list-item-content>
+			</v-list-item>
+
+			<v-list-item @click="logout">
+				<v-list-item-icon>
+					<v-icon>mdi-home</v-icon>
+				</v-list-item-icon>
+				<v-list-item-content>
+					<v-list-item-title>Logout</v-list-item-title>
 				</v-list-item-content>
 			</v-list-item>
 		</v-list>
@@ -46,9 +52,10 @@ export default {
 	},
 	methods: {
 		logout() {
-			this.$store.dispatch("logout").then(() => {
-				this.$router.push("/login");
-			});
+			confirm("Are you sure you want to delete this item?") &&
+				this.$store.dispatch("logout").then(() => {
+					this.$router.push("/login");
+				});
 		}
 	}
 };
