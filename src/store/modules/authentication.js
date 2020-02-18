@@ -4,13 +4,18 @@ import qs from "querystring";
 const state = {
 	status: "",
 	user: localStorage.getItem("logged-user") || "",
-	created_username: ""
+	created_username: "",
+	singup_notification: {
+		display: false,
+		text: ""
+	}
 };
 
 const getters = {
 	isAuthenticated: state => !!state.user,
 	authStatus: state => state.status,
-	createdUsername: state => state.created_username
+	createdUsername: state => state.created_username,
+	singupNotification: state => state.singup_notification
 };
 
 const actions = {
@@ -108,6 +113,9 @@ const mutations = {
 		state.status = "";
 		state.roles = "";
 		state.user = "";
+	},
+	singup_notification(state, singup_notification) {
+		state.singup_notification = singup_notification;
 	}
 };
 
