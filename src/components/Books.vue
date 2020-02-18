@@ -241,11 +241,23 @@ export default {
       this.dialog = true;
     },
     deleteItem(item) {
-      // const index = this.desserts.indexOf(item);
-      console.log(item);
-
       confirm("Are you sure you want to delete this item?") &&
-        this.desserts.splice(0, 1);
+        this.$store
+          .dispatch("book_delete", {
+            _id: item.id,
+            _rev: item.value._rev
+          })
+          .catch(err => {
+            this.showMessage = {
+              actios: "delete",
+              success: false,
+              message: err.response.data.reason,
+              display: true,
+              class: "error"
+            };
+          });
+
+      this.close();
     },
     close() {
       this.dialog = false;
@@ -301,7 +313,7 @@ export default {
         })
         .catch(err => {
           this.showMessage = {
-            actios: "created",
+            actios: "edit",
             success: false,
             message: err.response.data.reason,
             display: true,

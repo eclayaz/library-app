@@ -96,6 +96,25 @@ const actions = {
 				});
 		});
 	},
+	book_delete({ commit }, book) {
+		return new Promise((resolve, reject) => {
+			commit("book_request");
+
+			axios({
+				method: "DELETE",
+				url: `http://localhost:5984/library/${book._id}?rev=${book._rev}`,
+				withCredentials: true
+			})
+				.then(resp => {
+					commit("book_delete", book._id);
+					resolve(resp);
+				})
+				.catch(err => {
+					commit("book_error");
+					reject(err);
+				});
+		});
+	},
 	fetch_books({ commit }, options) {
 		return new Promise((resolve, reject) => {
 			commit("book_request");
@@ -141,6 +160,11 @@ const mutations = {
 		if (index !== -1) {
 			state.books.splice(index, 1, updatedBook);
 		}
+	},
+	book_delete(state, id) {
+		state.status = "deleted";
+		state.books = state.books.filter(book => book.id !== id);
+		state.bookCount--;
 	},
 	book_error(state) {
 		state.status = "error";
