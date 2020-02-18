@@ -1,10 +1,15 @@
 import axios from "axios";
 
 const state = {
-	status: ""
+	status: "",
+	books: [],
+	bookCount: 0
 };
 
-const getters = {};
+const getters = {
+	allBooks: state => state.books,
+	bookCount: state => state.bookCount
+};
 
 const actions = {
 	book_create({ commit }, book) {
@@ -27,8 +32,38 @@ const actions = {
 				withCredentials: true
 			})
 				.then(resp => {
-					book["rev"] = resp.data.rev;
-					commit("book_create", book);
+					const newBook = {
+						id: resp.data.id,
+						key: book.name,
+						value: {
+							_rev: resp.data.rev,
+							isbn: book.isbn,
+							category: book.category,
+							author: book.author,
+							published_date: book.published_date
+						}
+					};
+
+					commit("book_create", newBook);
+					resolve(resp);
+				})
+				.catch(err => {
+					commit("book_error");
+					reject(err);
+				});
+		});
+	},
+	fetch_books({ commit }, options) {
+		return new Promise((resolve, reject) => {
+			commit("book_request");
+			const skip = (options.page - 1) * options.itemsPerPage;
+			axios({
+				method: "GET",
+				url: `http://localhost:5984/library/_design/books/_view/basic_info?limit=${options.itemsPerPage}&skip=${skip}`,
+				withCredentials: true
+			})
+				.then(resp => {
+					commit("book_list", resp.data);
 					resolve(resp);
 				})
 				.catch(err => {
@@ -43,19 +78,21 @@ const mutations = {
 	book_request(state) {
 		state.status = "loading";
 	},
-	book_list(state, user, roles) {
+	book_list(state, data) {
 		state.status = "success";
-		state.roles = roles;
-		state.user = user;
+		state.books = data.rows;
+		state.bookCount = data.total_rows;
 	},
 	book_create(state, book) {
 		state.status = "created";
-		console.log({ book });
+		console.log(book);
+
+		state.books.unshift(book);
 	},
 	book_edit(state, data, book) {
-		//fix this
+		//wrong
 		state.status = "created";
-		console.log({ data, book });
+		state.books = state.books.unshift(book);
 	},
 	book_error(state) {
 		state.status = "error";

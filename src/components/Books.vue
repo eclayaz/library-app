@@ -2,12 +2,12 @@
   <v-card>
     <v-data-table
       :headers="headers"
-      :items="desserts"
+      :items="allBooks"
       :search="search"
       :options.sync="options"
-      :server-items-length="totalDesserts"
+      :server-items-length="bookCount"
       :loading="loading"
-      sort-by="calories"
+      sort-by="name"
       class="elevation-1"
     >
       <template v-slot:top>
@@ -111,14 +111,13 @@
         <v-icon small class="mr-2" @click="editItem(item)">edit</v-icon>
         <v-icon small @click="deleteItem(item)">delete</v-icon>
       </template>
-      <template v-slot:no-data>
-        <v-btn color="primary" @click="initialize">Reset</v-btn>
-      </template>
     </v-data-table>
   </v-card>
 </template>
 
 <script>
+import { mapGetters, mapActions } from "vuex";
+
 export default {
   name: "LibrarianPortal",
   data: () => ({
@@ -133,15 +132,19 @@ export default {
     search: "",
     headers: [
       {
-        text: "Dessert (100g serving)",
+        text: "Name",
         align: "left",
         sortable: false,
-        value: "name"
+        value: "key"
       },
-      { text: "Calories", value: "calories" },
-      { text: "Fat (g)", value: "fat" },
-      { text: "Carbs (g)", value: "carbs" },
-      { text: "Protein (g)", value: "protein" },
+      { text: "ISBN", value: "value.isbn", sortable: false },
+      { text: "Category", value: "value.category", sortable: false },
+      { text: "Author", value: "value.author", sortable: false },
+      {
+        text: "Published date",
+        value: "value.published_date",
+        sortable: false
+      },
       { text: "Actions", value: "action", sortable: false }
     ],
     totalDesserts: 0,
@@ -178,6 +181,7 @@ export default {
     }
   }),
   computed: {
+    ...mapGetters(["allBooks", "bookCount"]),
     formTitle() {
       return this.editedIndex === -1 ? "New book" : "Edit book";
     },
@@ -193,10 +197,8 @@ export default {
   watch: {
     options: {
       handler() {
-        this.getDataFromApi().then(data => {
-          this.desserts = data.items;
-          this.totalDesserts = data.total;
-        });
+        const { sortBy, sortDesc, page, itemsPerPage } = this.options;
+        this.fetchData({ sortBy, sortDesc, page, itemsPerPage });
       },
       deep: true
     },
@@ -210,16 +212,8 @@ export default {
       val && setTimeout(() => (this.$refs.picker.activePicker = "YEAR"));
     }
   },
-  mounted() {
-    this.initialize();
-  },
   methods: {
-    initialize() {
-      this.getDataFromApi().then(data => {
-        this.desserts = data.items;
-        this.totalDesserts = data.total;
-      });
-    },
+    ...mapActions(["fetch_books"]),
     editItem(item) {
       this.editedIndex = this.desserts.indexOf(item);
       this.editedItem = Object.assign({}, item);
@@ -256,7 +250,6 @@ export default {
           };
         })
         .catch(err => {
-          console.log();
           this.showMessage = {
             actios: "created",
             success: false,
@@ -269,137 +262,20 @@ export default {
           };
         });
 
-      //remove once items are getting from store
-      if (this.editedIndex > -1) {
-        Object.assign(this.desserts[this.editedIndex], this.editedItem);
-      } else {
-        this.desserts.push(this.editedItem);
-      }
-
       this.close();
-    },
-    getDataFromApi() {
-      this.loading = true;
-      return new Promise(resolve => {
-        const { sortBy, sortDesc, page, itemsPerPage } = this.options;
-        let items = this.getDesserts();
-        const total = items.length;
-        if (sortBy.length === 1 && sortDesc.length === 1) {
-          items = items.sort((a, b) => {
-            const sortA = a[sortBy[0]];
-            const sortB = b[sortBy[0]];
-            if (sortDesc[0]) {
-              if (sortA < sortB) return 1;
-              if (sortA > sortB) return -1;
-              return 0;
-            } else {
-              if (sortA < sortB) return -1;
-              if (sortA > sortB) return 1;
-              return 0;
-            }
-          });
-        }
-        if (itemsPerPage > 0) {
-          items = items.slice((page - 1) * itemsPerPage, page * itemsPerPage);
-        }
-        setTimeout(() => {
-          this.loading = false;
-          resolve({
-            items,
-            total
-          });
-        }, 1000);
-      });
     },
     savePublishDate(date) {
       this.$refs.menu.save(date);
+      this.loading = false;
     },
-    getDesserts() {
-      return [
-        {
-          name: "Frozen Yogurt",
-          calories: 159,
-          fat: 6.0,
-          carbs: 24,
-          protein: 4.0,
-          iron: "1%"
-        },
-        {
-          name: "Ice cream sandwich",
-          calories: 237,
-          fat: 9.0,
-          carbs: 37,
-          protein: 4.3,
-          iron: "1%"
-        },
-        {
-          name: "Eclair",
-          calories: 262,
-          fat: 16.0,
-          carbs: 23,
-          protein: 6.0,
-          iron: "7%"
-        },
-        {
-          name: "Cupcake",
-          calories: 305,
-          fat: 3.7,
-          carbs: 67,
-          protein: 4.3,
-          iron: "8%"
-        },
-        {
-          name: "Gingerbread",
-          calories: 356,
-          fat: 16.0,
-          carbs: 49,
-          protein: 3.9,
-          iron: "16%"
-        },
-        {
-          name: "Jelly bean",
-          calories: 375,
-          fat: 0.0,
-          carbs: 94,
-          protein: 0.0,
-          iron: "0%"
-        },
-        {
-          name: "Lollipop",
-          calories: 392,
-          fat: 0.2,
-          carbs: 98,
-          protein: 0,
-          iron: "2%"
-        },
-        {
-          name: "Honeycomb",
-          calories: 408,
-          fat: 3.2,
-          carbs: 87,
-          protein: 6.5,
-          iron: "45%"
-        },
-        {
-          name: "Donut",
-          calories: 452,
-          fat: 25.0,
-          carbs: 51,
-          protein: 4.9,
-          iron: "22%"
-        },
-        {
-          name: "KitKat",
-          calories: 518,
-          fat: 26.0,
-          carbs: 65,
-          protein: 7,
-          iron: "6%"
-        }
-      ];
+    fetchData(options) {
+      this.loading = true;
+      return new Promise(resolve => {
+        this.fetch_books(options);
+        resolve();
+        this.loading = false;
+      });
     }
   }
 };
 </script>
-
-<style></style>
