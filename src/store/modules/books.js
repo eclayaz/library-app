@@ -54,6 +54,48 @@ const actions = {
 				});
 		});
 	},
+	book_edit({ commit }, book) {
+		return new Promise((resolve, reject) => {
+			commit("book_request");
+
+			axios({
+				method: "PUT",
+				url: `http://localhost:5984/library/${book._id}`,
+				data: {
+					_rev: book._rev,
+					type: "book",
+					name: book.name,
+					category: book.category,
+					isbn: book.isbn,
+					author: book.author,
+					published_date: book.published_date,
+					comments: book.comments
+				},
+				withCredentials: true
+			})
+				.then(resp => {
+					const updatedBook = {
+						id: book._id,
+						key: book.name,
+						value: {
+							_rev: resp.data.rev,
+							name: book.name,
+							isbn: book.isbn,
+							category: book.category,
+							author: book.author,
+							published_date: book.published_date,
+							comments: book.published_date
+						}
+					};
+					commit("book_edit", updatedBook);
+					resolve(resp);
+				})
+				.catch(err => {
+					commit("book_error");
+					reject(err);
+				});
+		});
+	},
 	fetch_books({ commit }, options) {
 		return new Promise((resolve, reject) => {
 			commit("book_request");
@@ -93,10 +135,12 @@ const mutations = {
 		state.status = "created";
 		state.books.unshift(book);
 	},
-	book_edit(state, data, book) {
-		//wrong
-		state.status = "created";
-		state.books = state.books.unshift(book);
+	book_edit(state, updatedBook) {
+		state.status = "edited";
+		const index = state.books.findIndex(book => book.id === updatedBook.id);
+		if (index !== -1) {
+			state.books.splice(index, 1, updatedBook);
+		}
 	},
 	book_error(state) {
 		state.status = "error";

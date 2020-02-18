@@ -95,10 +95,18 @@
                     <v-spacer></v-spacer>
                     <v-btn color="blue darken-1" text @click="close">Cancel</v-btn>
                     <v-btn
+                      v-if="!isEdit"
                       color="blue darken-1"
                       :disabled="!isComplete"
                       text
                       @click.prevent="save()"
+                    >Create</v-btn>
+                    <v-btn
+                      v-if="isEdit"
+                      color="blue darken-1"
+                      :disabled="!isComplete"
+                      text
+                      @click.prevent="edit()"
                     >Save</v-btn>
                   </v-card-actions>
                 </v-card>
@@ -147,10 +155,8 @@ export default {
       },
       { text: "Actions", value: "action", sortable: false }
     ],
-    totalDesserts: 0,
     loading: true,
     options: {},
-    desserts: [],
     editedIndex: -1,
     editedItem: {
       name: "",
@@ -163,7 +169,7 @@ export default {
       name: "",
       isbn: "",
       category: "",
-      date: new Date().toISOString().substr(0, 10),
+      date: null,
       author: ""
     },
     bookCategories: [
@@ -184,6 +190,9 @@ export default {
     ...mapGetters(["allBooks", "bookCount"]),
     formTitle() {
       return this.editedIndex === -1 ? "New book" : "Edit book";
+    },
+    isEdit() {
+      return this.editedIndex !== -1;
     },
     isComplete() {
       return (
@@ -218,14 +227,25 @@ export default {
   methods: {
     ...mapActions(["fetch_books"]),
     editItem(item) {
-      this.editedIndex = this.desserts.indexOf(item);
-      this.editedItem = Object.assign({}, item);
+      this.editedIndex = 1;
+      this.editedItem = {
+        _id: item.id,
+        _rev: item.value._rev,
+        name: item.value.name,
+        isbn: item.value.isbn,
+        category: item.value.category,
+        date: item.value.published_date,
+        author: item.value.author,
+        comments: item.value.comments
+      };
       this.dialog = true;
     },
     deleteItem(item) {
-      const index = this.desserts.indexOf(item);
+      // const index = this.desserts.indexOf(item);
+      console.log(item);
+
       confirm("Are you sure you want to delete this item?") &&
-        this.desserts.splice(index, 1);
+        this.desserts.splice(0, 1);
     },
     close() {
       this.dialog = false;
@@ -260,6 +280,30 @@ export default {
               err.response.status === 409
                 ? `The book you are trying to create is already exist.`
                 : err.response.data.reason,
+            display: true,
+            class: "error"
+          };
+        });
+
+      this.close();
+    },
+    edit() {
+      this.$store
+        .dispatch("book_edit", {
+          _id: this.editedItem._id,
+          _rev: this.editedItem._rev,
+          name: this.editedItem.name,
+          isbn: this.editedItem.isbn,
+          category: this.editedItem.category,
+          published_date: this.editedItem.date,
+          author: this.editedItem.author,
+          comments: this.editedItem.comments
+        })
+        .catch(err => {
+          this.showMessage = {
+            actios: "created",
+            success: false,
+            message: err.response.data.reason,
             display: true,
             class: "error"
           };
