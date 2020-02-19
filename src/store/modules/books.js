@@ -29,6 +29,12 @@ const actions = {
 					isbn: book.isbn,
 					author: book.author,
 					published_date: book.published_date,
+					availability: {
+						status: true,
+						taken_by: "",
+						taken_name: "",
+						date: ""
+					},
 					comments: []
 				},
 				withCredentials: true
@@ -43,7 +49,14 @@ const actions = {
 							isbn: book.isbn,
 							category: book.category,
 							author: book.author,
-							published_date: book.published_date
+							published_date: book.published_date,
+							availability: {
+								status: true,
+								taken_by: "",
+								taken_name: "",
+								date: ""
+							},
+							comments: []
 						}
 					};
 
@@ -71,6 +84,7 @@ const actions = {
 					isbn: book.isbn,
 					author: book.author,
 					published_date: book.published_date,
+					availability: book.availability,
 					comments: book.comments
 				},
 				withCredentials: true
@@ -86,6 +100,7 @@ const actions = {
 							category: book.category,
 							author: book.author,
 							published_date: book.published_date,
+							availability: book.availability,
 							comments: book.published_date
 						}
 					};

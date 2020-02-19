@@ -11,7 +11,8 @@ const state = {
 	singup_notification: {
 		display: false,
 		text: ""
-	}
+	},
+	readers: null
 };
 
 const getters = {
@@ -20,6 +21,7 @@ const getters = {
 	createdUsername: state => state.created_username,
 	singupNotification: state => state.singup_notification,
 	userDetails: state => state.userDetails,
+	allReaders: state => state.readers,
 	isAdmin: state =>
 		state.userDetails.roles
 			? state.userDetails.roles.filter(role => role === "admin").length > 0
@@ -126,6 +128,24 @@ const actions = {
 					reject(err);
 				});
 		});
+	},
+	getReaders({ commit }) {
+		commit("auth_request");
+		return new Promise((resolve, reject) => {
+			axios({
+				method: "GET",
+				url: `${COUCH_DB_BASEURL}/_users/_design/list/_view/_reader`,
+				withCredentials: true
+			})
+				.then(resp => {
+					commit("readerList", resp.data);
+					resolve(resp);
+				})
+				.catch(err => {
+					commit("auth_error");
+					reject(err);
+				});
+		});
 	}
 };
 
@@ -154,6 +174,9 @@ const mutations = {
 	},
 	singup_notification(state, singup_notification) {
 		state.singup_notification = singup_notification;
+	},
+	readerList(state, readers) {
+		state.readers = readers.rows;
 	}
 };
 

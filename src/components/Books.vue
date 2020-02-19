@@ -10,6 +10,9 @@
       sort-by="name"
       class="elevation-1"
     >
+      <template
+        v-slot:item.value.availability.status="{ item }"
+      >{{getAvaialibilityText(item.value.availability) }}</template>
       <template v-slot:top>
         <v-toolbar flat color="white">
           <v-toolbar-title>Books</v-toolbar-title>
@@ -37,7 +40,6 @@
                   <v-card-title>
                     <span class="headline">{{ formTitle }}</span>
                   </v-card-title>
-
                   <v-card-text>
                     <v-form>
                       <v-container>
@@ -116,10 +118,35 @@
         </v-container>
       </template>
       <template v-if="!isReader" v-slot:item.action="{ item }">
+        <v-btn
+          @click="openAssignUserModal"
+          v-if="typeof(item.value.availability) === 'undefined' || item.value.availability.status"
+          depressed
+          small
+        >Assign</v-btn>
         <v-icon small class="mr-2" @click="editItem(item)">edit</v-icon>
         <v-icon small @click="deleteItem(item)">delete</v-icon>
       </template>
     </v-data-table>
+    <v-row justify="center">
+      <v-dialog v-model="assignToUserModel" persistent max-width="450">
+        <v-card>
+          <v-card-title class="headline">Assign to Reader</v-card-title>
+          <v-card-text>
+            <v-container>
+              <v-col sm="12">
+                <v-select :items="this.allReaders" item-text="value.name" outlined></v-select>
+              </v-col>
+            </v-container>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="green darken-1" text @click="closeAssignUserModal">Cancel</v-btn>
+            <v-btn color="green darken-1" text>Assign</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </v-row>
   </v-card>
 </template>
 
@@ -130,6 +157,7 @@ export default {
   name: "LibrarianPortal",
   data: () => ({
     dialog: false,
+    assignToUserModel: false,
     showMessage: {
       actios: "",
       success: null,
@@ -168,9 +196,10 @@ export default {
     rules: {
       required: value => !!value || "Required"
     }
+    // readerList: ["asda", "dasda"]
   }),
   computed: {
-    ...mapGetters(["allBooks", "bookCount", "isReader"]),
+    ...mapGetters(["allBooks", "bookCount", "isReader", "allReaders"]),
     formTitle() {
       return this.editedIndex === -1 ? "New book" : "Edit book";
     },
@@ -200,17 +229,27 @@ export default {
           text: "Published date",
           value: "value.published_date",
           sortable: false
-        }
+        },
+        { text: "Status", value: "value.availability.status", sortable: false }
       ];
-      if (!this.reader) {
-        headers.push({
-          text: "Actions",
-          value: "action",
-          sortable: false,
-          align: " d-none"
-        });
-      }
+
+      headers.push({
+        text: "Actions",
+        value: "action",
+        sortable: false
+      });
+
       return headers;
+    },
+    readerList() {
+      const readers = this.allReaders;
+      const dd = readers.map(reader => {
+        return reader.value.name;
+      });
+
+      console.log(dd);
+
+      return dd;
     }
   },
   watch: {
@@ -235,7 +274,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(["fetch_books"]),
+    ...mapActions(["fetch_books", "getReaders"]),
     editItem(item) {
       this.editedIndex = 1;
       this.editedItem = {
@@ -246,7 +285,8 @@ export default {
         category: item.value.category,
         date: item.value.published_date,
         author: item.value.author,
-        comments: item.value.comments
+        comments: item.value.comments,
+        availability: item.value.availability
       };
       this.dialog = true;
     },
@@ -319,7 +359,8 @@ export default {
           category: this.editedItem.category,
           published_date: this.editedItem.date,
           author: this.editedItem.author,
-          comments: this.editedItem.comments
+          comments: this.editedItem.comments,
+          availability: this.editedItem.availability
         })
         .catch(err => {
           this.showMessage = {
@@ -344,7 +385,22 @@ export default {
         resolve();
         this.loading = false;
       });
+    },
+    getAvaialibilityText(availability) {
+      if (typeof availability === "undefined") {
+        return "Available";
+      }
+      return availability.status ? "Available" : "Not Available";
+    },
+    openAssignUserModal() {
+      this.assignToUserModel = true;
+    },
+    closeAssignUserModal() {
+      this.assignToUserModel = false;
     }
+  },
+  created() {
+    this.getReaders();
   }
 };
 </script>
