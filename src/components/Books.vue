@@ -119,7 +119,7 @@
       </template>
       <template v-if="!isReader" v-slot:item.action="{ item }">
         <v-btn
-          @click="openAssignUserModal"
+          @click="openAssignUserModal(item)"
           v-if="typeof(item.value.availability) === 'undefined' || item.value.availability.status"
           depressed
           small
@@ -135,14 +135,19 @@
           <v-card-text>
             <v-container>
               <v-col sm="12">
-                <v-select :items="this.allReaders" item-text="value.name" outlined></v-select>
+                <v-select
+                  v-model="assignToReader"
+                  :items="this.allReaders"
+                  item-text="value.name"
+                  outlined
+                ></v-select>
               </v-col>
             </v-container>
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
             <v-btn color="green darken-1" text @click="closeAssignUserModal">Cancel</v-btn>
-            <v-btn color="green darken-1" text>Assign</v-btn>
+            <v-btn color="green darken-1" text @click="assignToUser">Assign</v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -158,6 +163,7 @@ export default {
   data: () => ({
     dialog: false,
     assignToUserModel: false,
+    assignToReader: null,
     showMessage: {
       actios: "",
       success: null,
@@ -381,11 +387,52 @@ export default {
       }
       return availability.status ? "Available" : "Not Available";
     },
-    openAssignUserModal() {
+    openAssignUserModal(item) {
+      this.editedItem = {
+        _id: item.id,
+        _rev: item.value._rev,
+        name: item.value.name,
+        isbn: item.value.isbn,
+        category: item.value.category,
+        date: item.value.published_date,
+        author: item.value.author,
+        comments: item.value.comments,
+        availability: item.value.availability
+      };
       this.assignToUserModel = true;
     },
     closeAssignUserModal() {
       this.assignToUserModel = false;
+      this.assignToReader = null;
+    },
+    assignToUser() {
+      this.$store
+        .dispatch("book_edit", {
+          _id: this.editedItem._id,
+          _rev: this.editedItem._rev,
+          name: this.editedItem.name,
+          isbn: this.editedItem.isbn,
+          category: this.editedItem.category,
+          published_date: this.editedItem.date,
+          author: this.editedItem.author,
+          comments: this.editedItem.comments,
+          availability: {
+            status: false,
+            taken_by: this.assignToReader.name,
+            taken_name: `${this.assignToReader.first_name} ${this.assignToReader.last_name}`,
+            date: new Date().toISOString().substr(0, 10)
+          }
+        })
+        .catch(err => {
+          this.showMessage = {
+            actios: "edit",
+            success: false,
+            message: err.response.data.reason,
+            display: true,
+            class: "error"
+          };
+        });
+      this.closeAssignUserModal();
     }
   },
   created() {
