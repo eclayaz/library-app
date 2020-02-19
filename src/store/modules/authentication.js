@@ -1,6 +1,8 @@
 import axios from "axios";
 import qs from "querystring";
 
+const COUCH_DB_BASEURL = process.env.VUE_APP_COUCH_DB_BASEURL;
+
 const state = {
 	status: "",
 	user: localStorage.getItem("logged-user") || "",
@@ -25,7 +27,7 @@ const actions = {
 
 			axios({
 				method: "POST",
-				url: "http://localhost:5984/_session",
+				url: `${COUCH_DB_BASEURL}/_session`,
 				data: qs.stringify({
 					username: user.username,
 					password: user.password
@@ -51,7 +53,7 @@ const actions = {
 		return new Promise((resolve, reject) => {
 			commit("auth_request");
 			axios({
-				url: `http://localhost:5984/_users/org.couchdb.user:${user.username}`,
+				url: `${COUCH_DB_BASEURL}/_users/org.couchdb.user:${user.username}`,
 				method: "PUT",
 				data: {
 					_id: `org.couchdb.user:${user.username}`,
@@ -82,7 +84,7 @@ const actions = {
 		return new Promise(resolve => {
 			axios({
 				method: "DELETE",
-				url: "http://localhost:5984/_session",
+				url: `${COUCH_DB_BASEURL}/_session`,
 				withCredentials: true
 			});
 

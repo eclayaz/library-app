@@ -1,5 +1,7 @@
 import axios from "axios";
 
+const COUCH_DB_BASEURL = process.env.VUE_APP_COUCH_DB_BASEURL;
+
 const state = {
 	status: "",
 	books: [],
@@ -18,7 +20,7 @@ const actions = {
 
 			axios({
 				method: "PUT",
-				url: `http://localhost:5984/library/${book.category}-${book.isbn}`,
+				url: `${COUCH_DB_BASEURL}/library/${book.category}-${book.isbn}`,
 				data: {
 					_id: `${book.category}-${book.isbn}`,
 					type: "book",
@@ -60,7 +62,7 @@ const actions = {
 
 			axios({
 				method: "PUT",
-				url: `http://localhost:5984/library/${book._id}`,
+				url: `${COUCH_DB_BASEURL}/library/${book._id}`,
 				data: {
 					_rev: book._rev,
 					type: "book",
@@ -102,7 +104,7 @@ const actions = {
 
 			axios({
 				method: "DELETE",
-				url: `http://localhost:5984/library/${book._id}?rev=${book._rev}`,
+				url: `${COUCH_DB_BASEURL}/library/${book._id}?rev=${book._rev}`,
 				withCredentials: true
 			})
 				.then(resp => {
@@ -126,7 +128,7 @@ const actions = {
 
 			axios({
 				method: "GET",
-				url: `http://localhost:5984/library/${view}`,
+				url: `${COUCH_DB_BASEURL}/library/${view}`,
 				withCredentials: true
 			})
 				.then(resp => {
