@@ -127,6 +127,14 @@
         <v-icon small class="mr-2" @click="editItem(item)">edit</v-icon>
         <v-icon small @click="deleteItem(item)">delete</v-icon>
       </template>
+      <template v-if="isReader" v-slot:item.action="{ item }">
+        <v-btn
+          @click="checkoutBook(item)"
+          v-if="typeof(item.value.availability) === 'undefined' || item.value.availability.status"
+          depressed
+          small
+        >Checkout</v-btn>
+      </template>
     </v-data-table>
     <v-row justify="center">
       <v-dialog v-model="assignToUserModel" persistent max-width="450">
@@ -204,7 +212,13 @@ export default {
     }
   }),
   computed: {
-    ...mapGetters(["allBooks", "bookCount", "isReader", "allReaders"]),
+    ...mapGetters([
+      "allBooks",
+      "bookCount",
+      "isReader",
+      "allReaders",
+      "userDetails"
+    ]),
     formTitle() {
       return this.editedIndex === -1 ? "New book" : "Edit book";
     },
@@ -433,6 +447,35 @@ export default {
           };
         });
       this.closeAssignUserModal();
+    },
+    checkoutBook(item) {
+      confirm("Are you sure you want to checkout this book?") &&
+        this.$store
+          .dispatch("book_edit", {
+            _id: item.id,
+            _rev: item.value._rev,
+            name: item.value.name,
+            isbn: item.value.isbn,
+            category: item.value.category,
+            date: item.value.published_date,
+            author: item.value.author,
+            comments: item.value.comments,
+            availability: {
+              status: false,
+              taken_by: this.userDetails.name,
+              taken_name: `${this.userDetails.first_name} ${this.userDetails.last_name}`,
+              date: new Date().toISOString().substr(0, 10)
+            }
+          })
+          .catch(err => {
+            this.showMessage = {
+              actios: "edit",
+              success: false,
+              message: err.response.data.reason,
+              display: true,
+              class: "error"
+            };
+          });
     }
   },
   created() {
