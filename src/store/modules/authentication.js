@@ -6,6 +6,7 @@ const COUCH_DB_BASEURL = process.env.VUE_APP_COUCH_DB_BASEURL;
 const state = {
 	status: "",
 	user: localStorage.getItem("logged-user") || "",
+	userRoles: localStorage.getItem("user-roles") || "",
 	userDetails: JSON.parse(localStorage.getItem("userDetails")) || {},
 	created_username: "",
 	singup_notification: {
@@ -22,18 +23,21 @@ const getters = {
 	singupNotification: state => state.singup_notification,
 	userDetails: state => state.userDetails,
 	allReaders: state => state.readers,
-	isAdmin: state =>
-		state.userDetails.roles
-			? state.userDetails.roles.filter(role => role === "admin").length > 0
-			: false,
-	isLibrarian: state =>
-		state.userDetails.roles
-			? state.userDetails.roles.filter(role => role === "librarian").length > 0
-			: false,
-	isReader: state =>
-		state.userDetails.roles
-			? state.userDetails.roles.filter(role => role === "reader").length > 0
-			: false
+	// isAdmin: state =>
+	// 	state.userDetails.roles
+	// 		? state.userDetails.roles.filter(role => role === "admin").length > 0
+	// 		: false,
+	// isLibrarian: state =>
+	// 	state.userDetails.roles
+	// 		? state.userDetails.roles.filter(role => role === "librarian").length > 0
+	// 		: false,
+	// isReader: state =>
+	// 	state.userDetails.roles
+	// 		? state.userDetails.roles.filter(role => role === "reader").length > 0
+	// 		: false,
+	isAdmin: state => state.userRoles === "_admin" || state.userRoles === "admin",
+	isLibrarian: state => state.userRoles === "librarian",
+	isReader: state => state.userRoles === "reader"
 };
 
 const actions = {
@@ -52,8 +56,9 @@ const actions = {
 			})
 				.then(resp => {
 					const user = resp.data.name;
-
+					localStorage.setItem("user-roles", resp.data.roles[0]);
 					localStorage.setItem("logged-user", user);
+
 					commit("auth_success", user);
 					resolve(resp);
 				})

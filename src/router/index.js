@@ -1,21 +1,13 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
+import store from "@/store/index";
 import Home from "@/views/Home.vue";
 import Login from "@/views/auth/Login.vue";
 import Signup from "@/views/auth/Signup.vue";
-import store from "@/store/index";
 
 Vue.use(VueRouter);
 
 const routes = [
-	{
-		path: "/",
-		name: "Home",
-		component: Home,
-		meta: {
-			requiresAuth: true
-		}
-	},
 	{
 		path: "/login",
 		name: "Login",
@@ -30,6 +22,22 @@ const routes = [
 		component: Signup,
 		meta: {
 			guest: true
+		}
+	},
+	{
+		path: "/",
+		name: "Home",
+		component: Home,
+		meta: {
+			requiresAuth: true
+		}
+	},
+	{
+		path: "/reader-return-books",
+		name: "ReaderReturnBooks",
+		component: Home,
+		meta: {
+			requiresAuth: true
 		}
 	}
 ];
@@ -48,18 +56,7 @@ router.beforeEach((to, from, next) => {
 				params: { nextUrl: to.fullPath }
 			});
 		} else {
-			console.log(store.getters.isAdmin);
-
-			// let user = JSON.parse(localStorage.getItem("user"));
-			// if (to.matched.some(record => record.meta.is_admin)) {
-			// 	if (user.is_admin == 1) {
-			// 		next();
-			// 	} else {
-			// 		next({ name: "Home" });
-			// 	}
-			// } else {
-			// 	next();
-			// }
+			// console.log(store.getters.isAdmin);
 			next();
 		}
 	} else if (to.matched.some(record => record.meta.guest)) {
