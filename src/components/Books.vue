@@ -196,7 +196,6 @@ export default {
     rules: {
       required: value => !!value || "Required"
     }
-    // readerList: ["asda", "dasda"]
   }),
   computed: {
     ...mapGetters(["allBooks", "bookCount", "isReader", "allReaders"]),
@@ -240,16 +239,6 @@ export default {
       });
 
       return headers;
-    },
-    readerList() {
-      const readers = this.allReaders;
-      const dd = readers.map(reader => {
-        return reader.value.name;
-      });
-
-      console.log(dd);
-
-      return dd;
     }
   },
   watch: {
@@ -400,7 +389,9 @@ export default {
     }
   },
   created() {
-    this.getReaders();
+    if (!this.isReader) {
+      this.getReaders();
+    }
   }
 };
 </script>
