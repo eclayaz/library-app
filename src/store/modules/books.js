@@ -5,12 +5,14 @@ const COUCH_DB_BASEURL = process.env.VUE_APP_COUCH_DB_BASEURL;
 const state = {
 	status: "",
 	books: [],
+	checkoutBookList: [],
 	bookCount: 0
 };
 
 const getters = {
 	allBooks: state => state.books,
-	bookCount: state => state.bookCount
+	bookCount: state => state.bookCount,
+	checkoutBookList: state => state.checkoutBookList
 };
 
 const actions = {
@@ -155,6 +157,58 @@ const actions = {
 					reject(err);
 				});
 		});
+	},
+	getCheckoutBooks({ commit }) {
+		return new Promise((resolve, reject) => {
+			commit("book_request");
+
+			axios({
+				method: "GET",
+				url: `${COUCH_DB_BASEURL}/library/_design/books/_view/_find_checkout_by_user?key="aaas"`,
+				withCredentials: true
+			})
+				.then(resp => {
+					commit("checkoutBookList", resp.data.rows);
+					resolve(resp);
+				})
+				.catch(err => {
+					commit("book_error");
+					reject(err);
+				});
+		});
+	},
+	returnBook({ commit }, book) {
+		return new Promise((resolve, reject) => {
+			axios({
+				method: "PUT",
+				url: `${COUCH_DB_BASEURL}/library/${book.id}`,
+				data: {
+					_rev: book.value._rev,
+					type: "book",
+					name: book.value.name,
+					category: book.value.category,
+					isbn: book.value.isbn,
+					author: book.value.author,
+					published_date: book.value.published_date,
+					availability: {
+						status: true,
+						taken_by: "",
+						taken_name: "",
+						date: ""
+					},
+					comments: book.value.comments
+				},
+				withCredentials: true
+			})
+				.then(resp => {
+					commit("returnBook", book.id);
+					resolve(resp);
+				})
+				.catch(err => {
+					commit("book_error");
+					reject(err);
+				});
+		});
 	}
 };
 
@@ -185,6 +239,14 @@ const mutations = {
 	},
 	book_error(state) {
 		state.status = "error";
+	},
+	checkoutBookList(state, bookList) {
+		state.checkoutBookList = bookList;
+	},
+	returnBook(state, id) {
+		state.checkoutBookList = state.checkoutBookList.filter(
+			book => book.id !== id
+		);
 	}
 };
 
