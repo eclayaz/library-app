@@ -29,7 +29,7 @@
             </v-col>
             <v-spacer></v-spacer>
             <v-col cols="2" class="d-flex justify-end">
-              <v-dialog v-model="dialog" max-width="500px">
+              <v-dialog v-model="dialog" max-width="500px" v-if="!isReader">
                 <template v-slot:activator="{ on }">
                   <v-btn color="primary" dark class="mb-2" v-on="on">New Book</v-btn>
                 </template>
@@ -115,7 +115,7 @@
           </v-row>
         </v-container>
       </template>
-      <template v-slot:item.action="{ item }">
+      <template v-if="!isReader" v-slot:item.action="{ item }">
         <v-icon small class="mr-2" @click="editItem(item)">edit</v-icon>
         <v-icon small @click="deleteItem(item)">delete</v-icon>
       </template>
@@ -138,23 +138,6 @@ export default {
       class: "success"
     },
     search: "",
-    headers: [
-      {
-        text: "Name",
-        align: "left",
-        sortable: false,
-        value: "value.name"
-      },
-      { text: "ISBN", value: "value.isbn", sortable: false },
-      { text: "Category", value: "value.category", sortable: false },
-      { text: "Author", value: "value.author", sortable: false },
-      {
-        text: "Published date",
-        value: "value.published_date",
-        sortable: false
-      },
-      { text: "Actions", value: "action", sortable: false }
-    ],
     loading: true,
     options: {},
     editedIndex: -1,
@@ -187,7 +170,7 @@ export default {
     }
   }),
   computed: {
-    ...mapGetters(["allBooks", "bookCount"]),
+    ...mapGetters(["allBooks", "bookCount", "isReader"]),
     formTitle() {
       return this.editedIndex === -1 ? "New book" : "Edit book";
     },
@@ -201,6 +184,33 @@ export default {
         this.editedItem.category &&
         this.editedItem.date
       );
+    },
+    headers() {
+      let headers = [
+        {
+          text: "Name",
+          align: "left",
+          sortable: false,
+          value: "value.name"
+        },
+        { text: "ISBN", value: "value.isbn", sortable: false },
+        { text: "Category", value: "value.category", sortable: false },
+        { text: "Author", value: "value.author", sortable: false },
+        {
+          text: "Published date",
+          value: "value.published_date",
+          sortable: false
+        }
+      ];
+      if (!this.reader) {
+        headers.push({
+          text: "Actions",
+          value: "action",
+          sortable: false,
+          align: " d-none"
+        });
+      }
+      return headers;
     }
   },
   watch: {
