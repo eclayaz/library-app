@@ -8,7 +8,7 @@
 
         <v-list-item-content>
           <v-list-item-title>{{userDetails.first_name}} {{userDetails.last_name}}</v-list-item-title>
-          <v-list-item-subtitle>Logged In</v-list-item-subtitle>
+          <v-list-item-subtitle>Logged in as {{userDetails.roles.join(', ')}}</v-list-item-subtitle>
         </v-list-item-content>
       </v-list-item>
 
