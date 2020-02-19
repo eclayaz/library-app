@@ -67,10 +67,21 @@ export default {
           password: this.password
         })
         .then(() => {
+          this.setUserDetails();
+        })
+        .catch(() => {
+          this.error = true;
+        });
+    },
+    setUserDetails() {
+      this.$store
+        .dispatch("setUserDetails")
+        .then(() => {
           this.$router.push("/");
         })
         .catch(() => {
           this.error = true;
+          this.$router.push("login");
         });
     }
   },

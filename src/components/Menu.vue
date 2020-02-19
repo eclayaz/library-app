@@ -1,62 +1,94 @@
 <template>
-	<v-navigation-drawer absolute permanent right app>
-		<template v-slot:prepend>
-			<v-list-item two-line>
-				<v-list-item-avatar>
-					<img src="https://randomuser.me/api/portraits/women/81.jpg" />
-				</v-list-item-avatar>
+  <v-navigation-drawer absolute permanent right app>
+    <template v-slot:prepend>
+      <v-list-item two-line>
+        <v-list-item-avatar>
+          <img src="https://randomuser.me/api/portraits/lego/1.jpg" />
+        </v-list-item-avatar>
 
-				<v-list-item-content>
-					<v-list-item-title>Jane Smith</v-list-item-title>
-					<v-list-item-subtitle>Logged In</v-list-item-subtitle>
-				</v-list-item-content>
-			</v-list-item>
-		</template>
+        <v-list-item-content>
+          <v-list-item-title>{{userDetails.first_name}} {{userDetails.last_name}}</v-list-item-title>
+          <v-list-item-subtitle>Logged In</v-list-item-subtitle>
+        </v-list-item-content>
+      </v-list-item>
 
-		<v-divider></v-divider>
+      <v-list-item>
+        <v-list-item-content>
+          <v-list-item-subtitle>Email: {{userDetails.email}}</v-list-item-subtitle>
+          <v-list-item-subtitle>Phone: {{userDetails.phone}}</v-list-item-subtitle>
+        </v-list-item-content>
+      </v-list-item>
+    </template>
 
-		<v-list dense>
-			<v-list-item v-for="item in items" :key="item.title">
-				<v-list-item-icon>
-					<v-icon>{{ item.icon }}</v-icon>
-				</v-list-item-icon>
+    <v-divider></v-divider>
 
-				<v-list-item-content>
-					<v-list-item-title>{{ item.title }}</v-list-item-title>
-				</v-list-item-content>
-			</v-list-item>
+    <v-list dense>
+      <v-list-item @click="home">
+        <v-list-item-icon>
+          <v-icon>mdi-home-city</v-icon>
+        </v-list-item-icon>
+        <v-list-item-content>
+          <v-list-item-title>Home</v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
 
-			<v-list-item @click="logout">
-				<v-list-item-icon>
-					<v-icon>mdi-home</v-icon>
-				</v-list-item-icon>
-				<v-list-item-content>
-					<v-list-item-title>Logout</v-list-item-title>
-				</v-list-item-content>
-			</v-list-item>
-		</v-list>
-	</v-navigation-drawer>
+      <v-list-item v-if="isAdmin" @click="manageUsers">
+        <v-list-item-icon>
+          <v-icon>mdi-account</v-icon>
+        </v-list-item-icon>
+        <v-list-item-content>
+          <v-list-item-title>Manage Users</v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
+
+      <v-list-item v-if="isAdmin" @click="manageUserRoles">
+        <v-list-item-icon>
+          <v-icon>mdi-account-group-outline</v-icon>
+        </v-list-item-icon>
+        <v-list-item-content>
+          <v-list-item-title>Manage User Roles</v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
+
+      <v-list-item @click="logout">
+        <v-list-item-icon>
+          <v-icon></v-icon>
+        </v-list-item-icon>
+        <v-list-item-content>
+          <v-list-item-title>Logout</v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
+    </v-list>
+  </v-navigation-drawer>
 </template>
 
 <script>
+import { mapGetters } from "vuex";
+
 export default {
-	name: "Menu",
-	data() {
-		return {
-			items: [
-				{ title: "Home", icon: "mdi-home-city" },
-				{ title: "My Account", icon: "mdi-account" },
-				{ title: "Users", icon: "mdi-account-group-outline" }
-			]
-		};
-	},
-	methods: {
-		logout() {
-			confirm("Are you sure you want to delete this item?") &&
-				this.$store.dispatch("logout").then(() => {
-					this.$router.push("/login");
-				});
-		}
-	}
+  name: "Menu",
+  data() {
+    return {};
+  },
+  methods: {
+    logout() {
+      confirm("Are you sure you want to delete this item?") &&
+        this.$store.dispatch("logout").then(() => {
+          this.$router.push("/login");
+        });
+    },
+    home() {
+      this.$router.push("/");
+    },
+    manageUsers() {
+      this.$router.push("/manage-users");
+    },
+    manageUserRoles() {
+      this.$router.push("/manage-user-roles");
+    }
+  },
+  computed: {
+    ...mapGetters(["isAdmin", "isLibrarian", "isReader", "userDetails"])
+  }
 };
 </script>
