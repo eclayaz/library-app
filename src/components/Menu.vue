@@ -50,6 +50,15 @@
         </v-list-item-content>
       </v-list-item>
 
+      <v-list-item v-if="isReader" @click="returnBooks">
+        <v-list-item-icon>
+          <v-icon>mdi-account-group-outline</v-icon>
+        </v-list-item-icon>
+        <v-list-item-content>
+          <v-list-item-title>Return Books</v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
+
       <v-list-item @click="logout">
         <v-list-item-icon>
           <v-icon></v-icon>
@@ -85,6 +94,9 @@ export default {
     },
     manageUserRoles() {
       this.$router.push("/manage-user-roles");
+    },
+    returnBooks() {
+      this.$router.push("/reader-return-books");
     }
   },
   computed: {

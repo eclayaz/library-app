@@ -451,7 +451,7 @@ export default {
     checkoutBook(item) {
       confirm("Are you sure you want to checkout this book?") &&
         this.$store
-          .dispatch("book_edit", {
+          .dispatch("checkoutBook", {
             _id: item.id,
             _rev: item.value._rev,
             name: item.value.name,

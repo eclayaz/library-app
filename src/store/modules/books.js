@@ -201,13 +201,19 @@ const actions = {
 				withCredentials: true
 			})
 				.then(resp => {
-					commit("returnBook", book.id);
+					commit("returnBook", resp.data);
 					resolve(resp);
 				})
 				.catch(err => {
 					commit("book_error");
 					reject(err);
 				});
+		});
+	},
+	checkoutBook({ commit, dispatch }, book) {
+		dispatch("book_edit", book).then(resp => {
+			book["_rev"] = resp.data.rev;
+			commit("checkoutBook", book);
 		});
 	}
 };
@@ -235,6 +241,9 @@ const mutations = {
 	book_delete(state, id) {
 		state.status = "deleted";
 		state.books = state.books.filter(book => book.id !== id);
+		state.checkoutBookList = state.checkoutBookList.filter(
+			book => book.id !== id
+		);
 		state.bookCount--;
 	},
 	book_error(state) {
@@ -243,10 +252,40 @@ const mutations = {
 	checkoutBookList(state, bookList) {
 		state.checkoutBookList = bookList;
 	},
-	returnBook(state, id) {
+	returnBook(state, returnedBook) {
 		state.checkoutBookList = state.checkoutBookList.filter(
-			book => book.id !== id
+			book => book.id !== returnedBook.id
 		);
+
+		const index = state.books.findIndex(book => book.id === returnedBook.id);
+		if (index !== -1) {
+			let obj = state.books[index];
+			obj["value"]["_rev"] = returnedBook.rev;
+			obj["value"]["availability"] = {
+				status: true,
+				taken_by: "",
+				taken_name: "",
+				date: ""
+			};
+			state.books.splice(index, 1, obj);
+		}
+	},
+	checkoutBook(state, updatedBook) {
+		let book = {
+			id: updatedBook._id,
+			key: updatedBook.availability.taken_by,
+			value: {
+				_rev: updatedBook._rev,
+				name: updatedBook.name,
+				isbn: updatedBook.isbn,
+				category: updatedBook.category,
+				author: updatedBook.author,
+				availability: updatedBook.availability,
+				comments: updatedBook.comments
+			}
+		};
+
+		state.checkoutBookList.unshift(book);
 	}
 };
 
