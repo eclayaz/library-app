@@ -16,9 +16,9 @@ const getters = {
 };
 
 const actions = {
-	book_create({ commit }, book) {
+	createBook({ commit }, book) {
 		return new Promise((resolve, reject) => {
-			commit("book_request");
+			commit("bookRequest");
 
 			axios({
 				method: "PUT",
@@ -62,18 +62,18 @@ const actions = {
 						}
 					};
 
-					commit("book_create", newBook);
+					commit("createBook", newBook);
 					resolve(resp);
 				})
 				.catch(err => {
-					commit("book_error");
+					commit("bookError");
 					reject(err);
 				});
 		});
 	},
-	book_edit({ commit }, book) {
+	editBook({ commit }, book) {
 		return new Promise((resolve, reject) => {
-			commit("book_request");
+			commit("bookRequest");
 
 			axios({
 				method: "PUT",
@@ -106,18 +106,18 @@ const actions = {
 							comments: book.published_date
 						}
 					};
-					commit("book_edit", updatedBook);
+					commit("editBook", updatedBook);
 					resolve(resp);
 				})
 				.catch(err => {
-					commit("book_error");
+					commit("bookError");
 					reject(err);
 				});
 		});
 	},
-	book_delete({ commit }, book) {
+	deleteBook({ commit }, book) {
 		return new Promise((resolve, reject) => {
-			commit("book_request");
+			commit("bookRequest");
 
 			axios({
 				method: "DELETE",
@@ -125,18 +125,18 @@ const actions = {
 				withCredentials: true
 			})
 				.then(resp => {
-					commit("book_delete", book._id);
+					commit("deleteBook", book._id);
 					resolve(resp);
 				})
 				.catch(err => {
-					commit("book_error");
+					commit("bookError");
 					reject(err);
 				});
 		});
 	},
-	fetch_books({ commit }, options) {
+	fetcBooks({ commit }, options) {
 		return new Promise((resolve, reject) => {
-			commit("book_request");
+			commit("bookRequest");
 			const skip = (options.page - 1) * options.itemsPerPage;
 
 			const view = options.search
@@ -149,18 +149,18 @@ const actions = {
 				withCredentials: true
 			})
 				.then(resp => {
-					commit("book_list", resp.data);
+					commit("bookList", resp.data);
 					resolve(resp);
 				})
 				.catch(err => {
-					commit("book_error");
+					commit("bookError");
 					reject(err);
 				});
 		});
 	},
 	getCheckoutBooks({ commit }) {
 		return new Promise((resolve, reject) => {
-			commit("book_request");
+			commit("bookRequest");
 
 			axios({
 				method: "GET",
@@ -172,7 +172,7 @@ const actions = {
 					resolve(resp);
 				})
 				.catch(err => {
-					commit("book_error");
+					commit("bookError");
 					reject(err);
 				});
 		});
@@ -205,13 +205,13 @@ const actions = {
 					resolve(resp);
 				})
 				.catch(err => {
-					commit("book_error");
+					commit("bookError");
 					reject(err);
 				});
 		});
 	},
 	checkoutBook({ commit, dispatch }, book) {
-		dispatch("book_edit", book).then(resp => {
+		dispatch("editBook", book).then(resp => {
 			book["_rev"] = resp.data.rev;
 			commit("checkoutBook", book);
 		});
@@ -219,26 +219,26 @@ const actions = {
 };
 
 const mutations = {
-	book_request(state) {
+	bookRequest(state) {
 		state.status = "loading";
 	},
-	book_list(state, data) {
+	bookList(state, data) {
 		state.status = "success";
 		state.books = data.rows;
 		state.bookCount = data.total_rows;
 	},
-	book_create(state, book) {
+	createBook(state, book) {
 		state.status = "created";
 		state.books.unshift(book);
 	},
-	book_edit(state, updatedBook) {
+	editBook(state, updatedBook) {
 		state.status = "edited";
 		const index = state.books.findIndex(book => book.id === updatedBook.id);
 		if (index !== -1) {
 			state.books.splice(index, 1, updatedBook);
 		}
 	},
-	book_delete(state, id) {
+	deleteBook(state, id) {
 		state.status = "deleted";
 		state.books = state.books.filter(book => book.id !== id);
 		state.checkoutBookList = state.checkoutBookList.filter(
@@ -246,7 +246,7 @@ const mutations = {
 		);
 		state.bookCount--;
 	},
-	book_error(state) {
+	bookError(state) {
 		state.status = "error";
 	},
 	checkoutBookList(state, bookList) {

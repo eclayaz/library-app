@@ -7,7 +7,6 @@
       :options.sync="options"
       :server-items-length="bookCount"
       :loading="loading"
-      sort-by="name"
       class="elevation-1"
     >
       <template
@@ -20,12 +19,13 @@
         <v-alert :color="showMessage.class" :value="showMessage.display">{{showMessage.message}}</v-alert>
         <v-container fill-height fluid class="mt-0 pt-0">
           <v-row no-gutters align="center" justify="center">
-            <v-col cols="3">
+            <v-col cols="4">
               <v-text-field
                 v-model="search"
                 append-icon="search"
-                label="Search"
-                single-line
+                label="Not a % search"
+                placeholder="Placeholder"
+                outlined
                 hide-details
                 class="pr-5"
               ></v-text-field>
@@ -281,7 +281,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(["fetch_books", "getReaders"]),
+    ...mapActions(["fetcBooks", "getReaders"]),
     editItem(item) {
       this.editedIndex = 1;
       this.editedItem = {
@@ -298,9 +298,9 @@ export default {
       this.dialog = true;
     },
     deleteItem(item) {
-      confirm("Are you sure you want to delete this item?") &&
+      confirm("Are you sure you want to delete this book?") &&
         this.$store
-          .dispatch("book_delete", {
+          .dispatch("deleteBook", {
             _id: item.id,
             _rev: item.value._rev
           })
@@ -325,7 +325,7 @@ export default {
     },
     save() {
       this.$store
-        .dispatch("book_create", {
+        .dispatch("createBook", {
           name: this.editedItem.name,
           isbn: this.editedItem.isbn,
           category: this.editedItem.category,
@@ -347,7 +347,7 @@ export default {
             success: false,
             message:
               err.response.status === 409
-                ? `The book you are trying to create is already exist.`
+                ? `The book is already exist.`
                 : err.response.data.reason,
             display: true,
             class: "error"
@@ -358,7 +358,7 @@ export default {
     },
     edit() {
       this.$store
-        .dispatch("book_edit", {
+        .dispatch("editBook", {
           _id: this.editedItem._id,
           _rev: this.editedItem._rev,
           name: this.editedItem.name,
@@ -388,7 +388,7 @@ export default {
     fetchData(options) {
       this.loading = true;
       return new Promise(resolve => {
-        this.fetch_books(options);
+        this.fetcBooks(options);
         resolve();
         this.loading = false;
       });
@@ -419,7 +419,7 @@ export default {
     },
     assignToUser() {
       this.$store
-        .dispatch("book_edit", {
+        .dispatch("editBook", {
           _id: this.editedItem._id,
           _rev: this.editedItem._rev,
           name: this.editedItem.name,

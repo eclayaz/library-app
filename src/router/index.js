@@ -56,7 +56,6 @@ router.beforeEach((to, from, next) => {
 				params: { nextUrl: to.fullPath }
 			});
 		} else {
-			// console.log(store.getters.isAdmin);
 			next();
 		}
 	} else if (to.matched.some(record => record.meta.guest)) {

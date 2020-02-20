@@ -125,7 +125,7 @@ export default {
             phone: this.phone
           })
           .then(() => {
-            this.$store.commit("singup_notification", {
+            this.$store.commit("singupNotification", {
               display: true,
               text:
                 "Your account has been successfully created! you can now login."

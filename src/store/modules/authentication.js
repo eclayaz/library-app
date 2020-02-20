@@ -9,7 +9,7 @@ const state = {
 	userRoles: localStorage.getItem("user-roles") || "",
 	userDetails: JSON.parse(localStorage.getItem("userDetails")) || {},
 	created_username: "",
-	singup_notification: {
+	singupNotification: {
 		display: false,
 		text: ""
 	},
@@ -34,7 +34,7 @@ const getters = {
 const actions = {
 	login({ commit }, user) {
 		return new Promise((resolve, reject) => {
-			commit("auth_request");
+			commit("requestAuth");
 
 			axios({
 				method: "POST",
@@ -50,11 +50,11 @@ const actions = {
 					localStorage.setItem("user-roles", resp.data.roles[0]);
 					localStorage.setItem("logged-user", user);
 
-					commit("auth_success", user);
+					commit("successAuth", user);
 					resolve(resp);
 				})
 				.catch(err => {
-					commit("auth_error");
+					commit("errorAuth");
 					localStorage.removeItem("logged-user");
 					reject(err);
 				});
@@ -62,7 +62,7 @@ const actions = {
 	},
 	register({ commit }, user) {
 		return new Promise((resolve, reject) => {
-			commit("auth_request");
+			commit("requestAuth");
 			const nextUserId = state.lastUserId + 1;
 			axios({
 				url: `${COUCH_DB_BASEURL}/_users/org.couchdb.user:${user.username}`,
@@ -82,12 +82,12 @@ const actions = {
 				withCredentials: true
 			})
 				.then(resp => {
-					commit("auth_created", user.username);
+					commit("userCreated", user.username);
 					localStorage.removeItem("logged-user");
 					resolve(resp);
 				})
 				.catch(err => {
-					commit("auth_error");
+					commit("errorAuth");
 					localStorage.removeItem("logged-user");
 					reject(err);
 				});
@@ -106,7 +106,7 @@ const actions = {
 		localStorage.removeItem("userDetails");
 	},
 	setUserDetails({ commit }) {
-		commit("auth_request");
+		commit("requestAuth");
 		return new Promise((resolve, reject) => {
 			axios({
 				method: "GET",
@@ -119,14 +119,14 @@ const actions = {
 					resolve(resp);
 				})
 				.catch(err => {
-					commit("auth_error");
+					commit("errorAuth");
 					localStorage.removeItem("logged-user");
 					reject(err);
 				});
 		});
 	},
 	getReaders({ commit }) {
-		commit("auth_request");
+		commit("requestAuth");
 		return new Promise((resolve, reject) => {
 			axios({
 				method: "GET",
@@ -138,14 +138,14 @@ const actions = {
 					resolve(resp);
 				})
 				.catch(err => {
-					commit("auth_error");
+					commit("errorAuth");
 					reject(err);
 				});
 		});
 	},
 	getLastUserId({ commit }) {
 		return new Promise((resolve, reject) => {
-			commit("auth_request");
+			commit("requestAuth");
 
 			axios({
 				method: "GET",
@@ -157,7 +157,7 @@ const actions = {
 					resolve(resp);
 				})
 				.catch(err => {
-					commit("auth_error");
+					commit("errorAuth");
 					reject(err);
 				});
 		});
@@ -165,19 +165,19 @@ const actions = {
 };
 
 const mutations = {
-	auth_request(state) {
+	requestAuth(state) {
 		state.status = "loading";
 	},
-	auth_success(state, user) {
+	successAuth(state, user) {
 		state.status = "success";
 		state.user = user;
 	},
-	auth_created(state, username) {
+	userCreated(state, username) {
 		state.status = "created";
 		state.created_username = username;
 		state.lastUserId++;
 	},
-	auth_error(state) {
+	errorAuth(state) {
 		state.status = "error";
 	},
 	logout(state) {
@@ -192,7 +192,7 @@ const mutations = {
 	setUserDetails(state, user) {
 		state.userDetails = user;
 	},
-	singup_notification(state, singup_notification) {
+	singupNotification(state, singup_notification) {
 		state.singup_notification = singup_notification;
 	},
 	readerList(state, readers) {
