@@ -455,7 +455,7 @@ export default {
             name: item.value.name,
             isbn: item.value.isbn,
             category: item.value.category,
-            date: item.value.published_date,
+            published_date: item.value.published_date,
             author: item.value.author,
             comments: item.value.comments,
             availability: {

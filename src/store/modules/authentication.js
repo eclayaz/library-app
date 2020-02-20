@@ -28,7 +28,8 @@ const getters = {
 		state.userDetails.roles[0] === "_admin" ||
 		state.userDetails.roles[0] === "admin",
 	isLibrarian: state => state.userDetails.roles[0] === "librarian",
-	isReader: state => state.userDetails.roles[0] === "reader"
+	isReader: state => state.userDetails.roles[0] === "reader",
+	getUser: state => state.user
 };
 
 const actions = {

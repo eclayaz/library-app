@@ -34,7 +34,7 @@ import { mapGetters, mapActions } from "vuex";
 export default {
   name: "ReaderReturnBooks",
   computed: {
-    ...mapGetters(["checkoutBookList"])
+    ...mapGetters(["checkoutBookList", "getUser"])
   },
   methods: {
     ...mapActions(["getCheckoutBooks"]),
@@ -51,7 +51,7 @@ export default {
     }
   },
   created() {
-    this.getCheckoutBooks();
+    this.getCheckoutBooks(this.getUser);
   }
 };
 </script>

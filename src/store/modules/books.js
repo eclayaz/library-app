@@ -158,13 +158,13 @@ const actions = {
 				});
 		});
 	},
-	getCheckoutBooks({ commit }) {
+	getCheckoutBooks({ commit }, user) {
 		return new Promise((resolve, reject) => {
 			commit("bookRequest");
 
 			axios({
 				method: "GET",
-				url: `${COUCH_DB_BASEURL}/library/_design/books/_view/_find_checkout_by_user?key="aaas"`,
+				url: `${COUCH_DB_BASEURL}/library/_design/books/_view/_find_checkout_by_user?key="${user}"`,
 				withCredentials: true
 			})
 				.then(resp => {
