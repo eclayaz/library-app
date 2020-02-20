@@ -117,20 +117,18 @@
           </v-row>
         </v-container>
       </template>
-      <template v-if="!isReader" v-slot:item.action="{ item }">
+      <template v-slot:item.action="{ item }">
         <v-btn
           @click="openAssignUserModal(item)"
-          v-if="typeof(item.value.availability) === 'undefined' || item.value.availability.status"
+          v-if="!isReader && (typeof(item.value.availability) === 'undefined' || item.value.availability.status)"
           depressed
           small
         >Assign</v-btn>
-        <v-icon small class="mr-2" @click="editItem(item)">edit</v-icon>
-        <v-icon small @click="deleteItem(item)">delete</v-icon>
-      </template>
-      <template v-if="isReader" v-slot:item.action="{ item }">
+        <v-icon v-if="!isReader" small class="mr-2" @click="editItem(item)">edit</v-icon>
+        <v-icon v-if="!isReader" small @click="deleteItem(item)">delete</v-icon>
         <v-btn
           @click="checkoutBook(item)"
-          v-if="typeof(item.value.availability) === 'undefined' || item.value.availability.status"
+          v-if="isReader && (typeof(item.value.availability) === 'undefined' || item.value.availability.status)"
           depressed
           small
         >Checkout</v-btn>

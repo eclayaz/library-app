@@ -23,18 +23,6 @@ const getters = {
 	singupNotification: state => state.singup_notification,
 	userDetails: state => state.userDetails,
 	allReaders: state => state.readers,
-	// isAdmin: state =>
-	// 	state.userDetails.roles
-	// 		? state.userDetails.roles.filter(role => role === "admin").length > 0
-	// 		: false,
-	// isLibrarian: state =>
-	// 	state.userDetails.roles
-	// 		? state.userDetails.roles.filter(role => role === "librarian").length > 0
-	// 		: false,
-	// isReader: state =>
-	// 	state.userDetails.roles
-	// 		? state.userDetails.roles.filter(role => role === "reader").length > 0
-	// 		: false,
 	isAdmin: state => state.userRoles === "_admin" || state.userRoles === "admin",
 	isLibrarian: state => state.userRoles === "librarian",
 	isReader: state => state.userRoles === "reader"
@@ -170,9 +158,16 @@ const mutations = {
 		state.status = "error";
 	},
 	logout(state) {
-		state.status = "";
-		state.user = "";
-		state.userDetails = {};
+		state.status = null;
+		state.user = null;
+		state.userRoles = null;
+		state.userDetails = null;
+		state.created_username = null;
+		state.singup_notification = null;
+		state.readers = null;
+		localStorage.removeItem("logged-user");
+		localStorage.removeItem("user-roles");
+		localStorage.removeItem("userDetails");
 	},
 	setUserDetails(state, user) {
 		state.userDetails = user;
