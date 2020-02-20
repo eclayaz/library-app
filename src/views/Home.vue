@@ -13,7 +13,7 @@
 <script>
 import Books from "@/components/Books";
 import Menu from "@/components/Menu";
-import ReaderReturnBooks from "@/views/ReaderReturnBooks";
+import ReaderReturnBooks from "@/components/ReaderReturnBooks";
 
 export default {
   name: "Home",
