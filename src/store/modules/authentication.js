@@ -9,7 +9,7 @@ const state = {
 	userRoles: localStorage.getItem("user-roles") || "",
 	userDetails: JSON.parse(localStorage.getItem("userDetails")) || {},
 	created_username: "",
-	singupNotification: {
+	singup_notification: {
 		display: false,
 		text: ""
 	},
