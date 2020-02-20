@@ -13,7 +13,8 @@ const state = {
 		display: false,
 		text: ""
 	},
-	readers: null
+	readers: null,
+	lastUserId: 1
 };
 
 const getters = {
@@ -62,6 +63,7 @@ const actions = {
 	register({ commit }, user) {
 		return new Promise((resolve, reject) => {
 			commit("auth_request");
+			const nextUserId = state.lastUserId + 1;
 			axios({
 				url: `${COUCH_DB_BASEURL}/_users/org.couchdb.user:${user.username}`,
 				method: "PUT",
@@ -73,6 +75,7 @@ const actions = {
 					last_name: user.last_name,
 					email: user.email,
 					phone: user.phone,
+					user_id: nextUserId,
 					roles: [],
 					type: "user"
 				},
@@ -101,21 +104,6 @@ const actions = {
 		localStorage.removeItem("logged-user");
 		localStorage.removeItem("user-roles");
 		localStorage.removeItem("userDetails");
-
-		// return new Promise(() => {
-		// 	axios({
-		// 		method: "DELETE",
-		// 		url: `${COUCH_DB_BASEURL}/_session`,
-		// 		withCredentials: true
-		// 	});
-
-		// 	commit("logout");
-		// 	localStorage.removeItem("logged-user");
-		// 	localStorage.removeItem("user-roles");
-		// 	localStorage.removeItem("userDetails");
-		// 	this.$router.push("/");
-		// 	//resolve();
-		// });
 	},
 	setUserDetails({ commit }) {
 		commit("auth_request");
@@ -154,6 +142,25 @@ const actions = {
 					reject(err);
 				});
 		});
+	},
+	getLastUserId({ commit }) {
+		return new Promise((resolve, reject) => {
+			commit("auth_request");
+
+			axios({
+				method: "GET",
+				url: `${COUCH_DB_BASEURL}/_users/_design/info/_view/_user_id_seq`,
+				withCredentials: true
+			})
+				.then(resp => {
+					commit("getLastUserIdSuccess", resp.data.rows[0].value);
+					resolve(resp);
+				})
+				.catch(err => {
+					commit("auth_error");
+					reject(err);
+				});
+		});
 	}
 };
 
@@ -168,6 +175,7 @@ const mutations = {
 	auth_created(state, username) {
 		state.status = "created";
 		state.created_username = username;
+		state.lastUserId++;
 	},
 	auth_error(state) {
 		state.status = "error";
@@ -189,6 +197,9 @@ const mutations = {
 	},
 	readerList(state, readers) {
 		state.readers = readers.rows;
+	},
+	getLastUserIdSuccess(state, value) {
+		state.lastUserId = value;
 	}
 };
 

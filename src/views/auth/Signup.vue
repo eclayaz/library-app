@@ -90,17 +90,19 @@
 </template>
 
 <script>
+import { mapActions } from "vuex";
+
 export default {
   name: "Signup",
   data: () => ({
     userExists: false,
-    username: "aa",
-    first_name: "bb",
-    last_name: "cc",
-    email: "eclayaz@gmail.com",
-    password: "123",
-    confirm_password: "123",
-    phone: "0766",
+    username: "",
+    first_name: "",
+    last_name: "",
+    email: "",
+    password: "",
+    confirm_password: "",
+    phone: "",
     rules: {
       required: value => !!value || "Required",
       email: value => {
@@ -110,6 +112,7 @@ export default {
     }
   }),
   methods: {
+    ...mapActions(["getLastUserId"]),
     register() {
       if (this.valid()) {
         this.$store
@@ -137,6 +140,9 @@ export default {
     valid() {
       return this.password === this.confirm_password;
     }
+  },
+  created() {
+    this.getLastUserId();
   }
 };
 </script>
