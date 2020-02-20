@@ -23,9 +23,11 @@ const getters = {
 	singupNotification: state => state.singup_notification,
 	userDetails: state => state.userDetails,
 	allReaders: state => state.readers,
-	isAdmin: state => state.userRoles === "_admin" || state.userRoles === "admin",
-	isLibrarian: state => state.userRoles === "librarian",
-	isReader: state => state.userRoles === "reader"
+	isAdmin: state =>
+		state.userDetails.roles[0] === "_admin" ||
+		state.userDetails.roles[0] === "admin",
+	isLibrarian: state => state.userDetails.roles[0] === "librarian",
+	isReader: state => state.userDetails.roles[0] === "reader"
 };
 
 const actions = {
@@ -89,18 +91,31 @@ const actions = {
 		});
 	},
 	logout({ commit }) {
-		return new Promise(resolve => {
-			axios({
-				method: "DELETE",
-				url: `${COUCH_DB_BASEURL}/_session`,
-				withCredentials: true
-			});
-
-			commit("logout");
-			localStorage.removeItem("logged-user");
-			localStorage.removeItem("userDetails");
-			resolve();
+		axios({
+			method: "DELETE",
+			url: `${COUCH_DB_BASEURL}/_session`,
+			withCredentials: true
 		});
+
+		commit("logout");
+		localStorage.removeItem("logged-user");
+		localStorage.removeItem("user-roles");
+		localStorage.removeItem("userDetails");
+
+		// return new Promise(() => {
+		// 	axios({
+		// 		method: "DELETE",
+		// 		url: `${COUCH_DB_BASEURL}/_session`,
+		// 		withCredentials: true
+		// 	});
+
+		// 	commit("logout");
+		// 	localStorage.removeItem("logged-user");
+		// 	localStorage.removeItem("user-roles");
+		// 	localStorage.removeItem("userDetails");
+		// 	this.$router.push("/");
+		// 	//resolve();
+		// });
 	},
 	setUserDetails({ commit }) {
 		commit("auth_request");
@@ -163,11 +178,8 @@ const mutations = {
 		state.userRoles = null;
 		state.userDetails = null;
 		state.created_username = null;
-		state.singup_notification = null;
+		state.singup_notification = { display: false, text: "" };
 		state.readers = null;
-		localStorage.removeItem("logged-user");
-		localStorage.removeItem("user-roles");
-		localStorage.removeItem("userDetails");
 	},
 	setUserDetails(state, user) {
 		state.userDetails = user;

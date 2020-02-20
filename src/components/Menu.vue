@@ -58,34 +58,24 @@
           <v-list-item-title>Return Books</v-list-item-title>
         </v-list-item-content>
       </v-list-item>
-
-      <v-list-item @click="logout">
-        <v-list-item-icon>
-          <v-icon></v-icon>
-        </v-list-item-icon>
-        <v-list-item-content>
-          <v-list-item-title>Logout</v-list-item-title>
-        </v-list-item-content>
-      </v-list-item>
+      <Logout></Logout>
     </v-list>
   </v-navigation-drawer>
 </template>
 
 <script>
 import { mapGetters } from "vuex";
+import Logout from "@/components/Logout";
 
 export default {
   name: "Menu",
   data() {
     return {};
   },
+  components: {
+    Logout
+  },
   methods: {
-    logout() {
-      confirm("Are you sure you want to delete this item?") &&
-        this.$store.dispatch("logout").then(() => {
-          this.$router.push("/login");
-        });
-    },
     home() {
       this.$router.push("/");
     },
